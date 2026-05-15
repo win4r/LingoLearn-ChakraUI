@@ -7,6 +7,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  SimpleGrid,
   Switch,
   Select,
   Slider,
@@ -45,6 +46,8 @@ import {
 import {
   FiUser,
   FiBell,
+  FiCheck,
+  FiDroplet,
   FiMoon,
   FiSun,
   FiVolume2,
@@ -64,6 +67,7 @@ import {
   FiStar,
 } from 'react-icons/fi'
 import { userProgress } from '../data/mockData'
+import { useAppTheme } from '../AppThemeProvider'
 
 // 设置项组件
 const SettingItem = memo(({ icon, label, description, children, onClick }) => (
@@ -72,7 +76,7 @@ const SettingItem = memo(({ icon, label, description, children, onClick }) => (
     spacing={4}
     cursor={onClick ? 'pointer' : 'default'}
     onClick={onClick}
-    _hover={onClick ? { bg: 'gray.50' } : {}}
+    _hover={onClick ? { bg: 'app.hoverBg' } : {}}
     transition="all 0.2s"
     borderRadius="lg"
     px={2}
@@ -82,16 +86,16 @@ const SettingItem = memo(({ icon, label, description, children, onClick }) => (
       w={10}
       h={10}
       borderRadius="lg"
-      bg="gray.100"
+      bg="app.surfaceMuted"
       align="center"
       justify="center"
     >
-      <Icon as={icon} boxSize={5} color="gray.600" />
+      <Icon as={icon} boxSize={5} color="app.navText" />
     </Flex>
     <Box flex={1}>
       <Text fontWeight="medium">{label}</Text>
       {description && (
-        <Text fontSize="sm" color="gray.500">{description}</Text>
+        <Text fontSize="sm" color="app.textMuted">{description}</Text>
       )}
     </Box>
     {children || (onClick && <Icon as={FiChevronRight} color="gray.400" />)}
@@ -99,6 +103,57 @@ const SettingItem = memo(({ icon, label, description, children, onClick }) => (
 ))
 
 SettingItem.displayName = 'SettingItem'
+
+const ThemeOptionCard = memo(({ option, isSelected, onSelect }) => (
+  <Button
+    type="button"
+    h="auto"
+    minH="76px"
+    p={3}
+    justifyContent="flex-start"
+    variant="outline"
+    borderRadius="lg"
+    borderColor={isSelected ? 'brand.500' : 'app.border'}
+    bg={isSelected ? 'app.activeBg' : 'app.surface'}
+    whiteSpace="normal"
+    aria-pressed={isSelected}
+    onClick={() => onSelect(option.id)}
+    _hover={{
+      borderColor: 'brand.400',
+      bg: isSelected ? 'app.activeBg' : 'app.hoverBg',
+    }}
+  >
+    <HStack spacing={3} w="full" align="center">
+      <HStack spacing={1} flexShrink={0}>
+        {option.swatches.map((color) => (
+          <Box
+            key={color}
+            w={4}
+            h={4}
+            borderRadius="full"
+            bg={color}
+            borderWidth="1px"
+            borderColor="whiteAlpha.700"
+            boxShadow="inset 0 0 0 1px rgba(0,0,0,0.08)"
+          />
+        ))}
+      </HStack>
+      <Box flex={1} textAlign="left">
+        <Text fontSize="sm" fontWeight="bold" color="app.text">
+          {option.name}
+        </Text>
+        <Text fontSize="xs" color="app.textMuted" noOfLines={2}>
+          {option.description}
+        </Text>
+      </Box>
+      {isSelected && (
+        <Icon as={FiCheck} boxSize={5} color="brand.600" flexShrink={0} />
+      )}
+    </HStack>
+  </Button>
+))
+
+ThemeOptionCard.displayName = 'ThemeOptionCard'
 
 // 用户资料编辑模态框
 const ProfileEditModal = ({ isOpen, onClose }) => {
@@ -159,6 +214,7 @@ const ProfileEditModal = ({ isOpen, onClose }) => {
 // 主设置页面
 const SettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
+  const { activeTheme, setThemeId, themeId, themeOptions } = useAppTheme()
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const {
@@ -185,6 +241,23 @@ const SettingsPage = () => {
     setSettings(prev => ({ ...prev, [key]: value }))
     toast({
       title: '设置已更新',
+      status: 'success',
+      duration: 1500,
+      position: 'top',
+    })
+  }
+
+  const handleThemeChange = (nextThemeId) => {
+    if (nextThemeId === themeId) {
+      return
+    }
+
+    const nextTheme = themeOptions.find((option) => option.id === nextThemeId)
+
+    setThemeId(nextThemeId)
+    toast({
+      title: '主题已切换',
+      description: nextTheme?.name,
       status: 'success',
       duration: 1500,
       position: 'top',
@@ -248,7 +321,7 @@ const SettingsPage = () => {
       </AlertDialog>
 
       {/* 用户信息卡片 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl" overflow="hidden">
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl" overflow="hidden">
         <Box
           h="80px"
           bgGradient="linear(to-r, brand.400, brand.600)"
@@ -259,7 +332,8 @@ const SettingsPage = () => {
               size="xl"
               name="学习者"
               bg="brand.500"
-              border="4px solid white"
+              borderWidth="4px"
+              borderColor="app.surface"
               boxShadow="lg"
             />
             <VStack spacing={1}>
@@ -273,7 +347,7 @@ const SettingsPage = () => {
                   aria-label="编辑资料"
                 />
               </HStack>
-              <Text fontSize="sm" color="gray.500">learner@example.com</Text>
+              <Text fontSize="sm" color="app.textMuted">learner@example.com</Text>
             </VStack>
 
             <HStack spacing={6} pt={2}>
@@ -281,25 +355,25 @@ const SettingsPage = () => {
                 <Text fontSize="xl" fontWeight="bold" color="brand.500">
                   {userProgress.streak}
                 </Text>
-                <Text fontSize="xs" color="gray.500">连续天数</Text>
+                <Text fontSize="xs" color="app.textMuted">连续天数</Text>
               </VStack>
               <Divider orientation="vertical" h="40px" />
               <VStack spacing={0}>
                 <Text fontSize="xl" fontWeight="bold" color="accent.500">
                   {userProgress.masteredWords}
                 </Text>
-                <Text fontSize="xs" color="gray.500">已掌握</Text>
+                <Text fontSize="xs" color="app.textMuted">已掌握</Text>
               </VStack>
               <Divider orientation="vertical" h="40px" />
               <VStack spacing={0}>
-                <Text fontSize="xl" fontWeight="bold" color="purple.500">
+                <Text fontSize="xl" fontWeight="bold" color="warm.500">
                   {Math.floor(userProgress.totalMinutes / 60)}h
                 </Text>
-                <Text fontSize="xs" color="gray.500">学习时长</Text>
+                <Text fontSize="xs" color="app.textMuted">学习时长</Text>
               </VStack>
             </HStack>
 
-            <Badge colorScheme="yellow" fontSize="sm" px={4} py={1} borderRadius="full">
+            <Badge colorScheme="warm" fontSize="sm" px={4} py={1} borderRadius="full">
               🏅 高级学习者
             </Badge>
           </VStack>
@@ -307,7 +381,7 @@ const SettingsPage = () => {
       </Card>
 
       {/* 学习设置 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl">
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
         <CardHeader pb={0}>
           <Heading size="md">学习设置</Heading>
         </CardHeader>
@@ -380,6 +454,7 @@ const SettingsPage = () => {
               description="翻看单词时自动播放"
             >
               <Switch
+                aria-label="自动播放发音"
                 colorScheme="brand"
                 isChecked={settings.autoPlay}
                 onChange={(e) => updateSetting('autoPlay', e.target.checked)}
@@ -391,7 +466,7 @@ const SettingsPage = () => {
       </Card>
 
       {/* 通知设置 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl">
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
         <CardHeader pb={0}>
           <Heading size="md">通知设置</Heading>
         </CardHeader>
@@ -403,6 +478,7 @@ const SettingsPage = () => {
               description="接收学习提醒和更新"
             >
               <Switch
+                aria-label="推送通知"
                 colorScheme="brand"
                 isChecked={settings.notifications}
                 onChange={(e) => updateSetting('notifications', e.target.checked)}
@@ -416,6 +492,7 @@ const SettingsPage = () => {
               description="操作音效"
             >
               <Switch
+                aria-label="声音"
                 colorScheme="brand"
                 isChecked={settings.sound}
                 onChange={(e) => updateSetting('sound', e.target.checked)}
@@ -429,6 +506,7 @@ const SettingsPage = () => {
               description="每天定时提醒学习"
             >
               <Switch
+                aria-label="每日提醒"
                 colorScheme="brand"
                 isChecked={settings.dailyReminder}
                 onChange={(e) => updateSetting('dailyReminder', e.target.checked)}
@@ -439,10 +517,10 @@ const SettingsPage = () => {
         </CardBody>
       </Card>
 
-      {/* 通用设置 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl">
+      {/* 外观设置 */}
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
         <CardHeader pb={0}>
-          <Heading size="md">通用设置</Heading>
+          <Heading size="md">外观设置</Heading>
         </CardHeader>
         <CardBody>
           <VStack spacing={0} align="stretch" divider={<Divider />}>
@@ -452,6 +530,7 @@ const SettingsPage = () => {
               description="护眼夜间模式"
             >
               <Switch
+                aria-label="深色模式"
                 colorScheme="brand"
                 isChecked={colorMode === 'dark'}
                 onChange={toggleColorMode}
@@ -459,6 +538,48 @@ const SettingsPage = () => {
               />
             </SettingItem>
 
+            <Box py={4}>
+              <HStack spacing={4} align="flex-start">
+                <Flex
+                  w={10}
+                  h={10}
+                  borderRadius="lg"
+                  bg="app.surfaceMuted"
+                  align="center"
+                  justify="center"
+                  flexShrink={0}
+                >
+                  <Icon as={FiDroplet} boxSize={5} color="app.navText" />
+                </Flex>
+                <Box flex={1}>
+                  <Text fontWeight="medium">主题色</Text>
+                  <Text fontSize="sm" color="app.textMuted">
+                    当前：{activeTheme.name}
+                  </Text>
+                  <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={3} mt={4}>
+                    {themeOptions.map((option) => (
+                      <ThemeOptionCard
+                        key={option.id}
+                        option={option}
+                        isSelected={option.id === themeId}
+                        onSelect={handleThemeChange}
+                      />
+                    ))}
+                  </SimpleGrid>
+                </Box>
+              </HStack>
+            </Box>
+          </VStack>
+        </CardBody>
+      </Card>
+
+      {/* 通用设置 */}
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
+        <CardHeader pb={0}>
+          <Heading size="md">通用设置</Heading>
+        </CardHeader>
+        <CardBody>
+          <VStack spacing={0} align="stretch" divider={<Divider />}>
             <SettingItem
               icon={FiGlobe}
               label="语言"
@@ -481,7 +602,7 @@ const SettingsPage = () => {
       </Card>
 
       {/* 数据管理 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl">
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
         <CardHeader pb={0}>
           <Heading size="md">数据管理</Heading>
         </CardHeader>
@@ -512,7 +633,7 @@ const SettingsPage = () => {
       </Card>
 
       {/* 关于与帮助 */}
-      <Card bg="white" boxShadow="md" borderRadius="2xl">
+      <Card bg="app.surface" boxShadow="md" borderRadius="2xl">
         <CardHeader pb={0}>
           <Heading size="md">关于与帮助</Heading>
         </CardHeader>

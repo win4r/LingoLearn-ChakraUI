@@ -6,7 +6,6 @@ import {
   HStack,
   Text,
   Icon,
-  useColorModeValue,
   IconButton,
   Progress,
   Badge,
@@ -41,9 +40,9 @@ const App = () => {
   const [currentCourse, setCurrentCourse] = useState(courses[0])
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const bgColor = useColorModeValue('gray.50', 'gray.900')
-  const headerBg = useColorModeValue('white', 'gray.800')
-  const tabBarBg = useColorModeValue('white', 'gray.800')
+  const bgColor = 'app.bg'
+  const headerBg = 'app.surface'
+  const tabBarBg = 'app.surface'
 
   const isMobile = useBreakpointValue({ base: true, md: false })
   const isDesktop = useBreakpointValue({ base: false, lg: true })
@@ -119,10 +118,10 @@ const App = () => {
             p={3}
             borderRadius="xl"
             cursor="pointer"
-            bg={activeTab === tab.id ? 'brand.50' : 'transparent'}
-            color={activeTab === tab.id ? 'brand.600' : 'gray.600'}
+            bg={activeTab === tab.id ? 'app.activeBg' : 'transparent'}
+            color={activeTab === tab.id ? 'brand.600' : 'app.navText'}
             fontWeight={activeTab === tab.id ? 'semibold' : 'normal'}
-            _hover={{ bg: activeTab === tab.id ? 'brand.50' : 'gray.100' }}
+            _hover={{ bg: activeTab === tab.id ? 'app.activeBg' : 'app.hoverBg' }}
             onClick={() => {
               setActiveTab(tab.id)
               onClose()
@@ -143,14 +142,14 @@ const App = () => {
       <Divider />
 
       <Box p={4}>
-        <Text fontSize="sm" color="gray.500" mb={2}>当前课程</Text>
-        <Flex align="center" gap={3} p={3} bg="gray.50" borderRadius="xl">
+        <Text fontSize="sm" color="app.textMuted" mb={2}>当前课程</Text>
+        <Flex align="center" gap={3} p={3} bg="app.surfaceMuted" borderRadius="xl">
           <Box w={8} h={8} borderRadius="lg" bg="accent.100" display="flex" alignItems="center" justifyContent="center">
             <Text fontSize="sm">📚</Text>
           </Box>
           <Box flex={1}>
             <Text fontSize="sm" fontWeight="medium">{currentCourse.name}</Text>
-            <Text fontSize="xs" color="gray.500">{currentCourse.level}</Text>
+            <Text fontSize="xs" color="app.textMuted">{currentCourse.level}</Text>
           </Box>
           <Text fontSize="sm" fontWeight="bold" color="brand.500">{currentCourse.progress}%</Text>
         </Flex>
@@ -162,7 +161,7 @@ const App = () => {
         <Avatar size="sm" name="用户" bg="brand.500" />
         <Box flex={1}>
           <Text fontSize="sm" fontWeight="medium">学习者</Text>
-          <Text fontSize="xs" color="gray.500">已连续学习 {userProgress.streak} 天</Text>
+          <Text fontSize="xs" color="app.textMuted">已连续学习 {userProgress.streak} 天</Text>
         </Box>
       </Flex>
     </VStack>
@@ -192,7 +191,7 @@ const App = () => {
             top={0}
             bg={headerBg}
             borderRightWidth="1px"
-            borderColor="gray.200"
+            borderColor="app.border"
             overflowY="auto"
           >
             <SidebarContent />
@@ -213,7 +212,7 @@ const App = () => {
             zIndex={10}
             bg={headerBg}
             borderBottomWidth="1px"
-            borderColor="gray.100"
+            borderColor="app.borderSubtle"
             px={4}
             py={3}
           >
@@ -233,7 +232,7 @@ const App = () => {
                     <Text fontSize="lg" fontWeight="bold" color="brand.600">
                       {tabs.find(t => t.id === activeTab)?.label}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize="xs" color="app.textMuted">
                       {currentCourse.name} · {currentCourse.level}
                     </Text>
                   </Box>
@@ -245,7 +244,7 @@ const App = () => {
                   display={isMobile ? 'none' : 'block'}
                   w={{ md: '200px', lg: '300px' }}
                 >
-                  <Text fontSize="xs" color="gray.500" mb={1}>
+                  <Text fontSize="xs" color="app.textMuted" mb={1}>
                     今日进度: {userProgress.todayLearned}/{userProgress.todayGoal} 个单词
                   </Text>
                   <Progress
@@ -300,7 +299,7 @@ const App = () => {
           right={0}
           bg={tabBarBg}
           borderTopWidth="1px"
-          borderColor="gray.200"
+          borderColor="app.border"
           px={2}
           py={2}
           zIndex={10}
@@ -318,8 +317,8 @@ const App = () => {
                 px={3}
                 borderRadius="xl"
                 cursor="pointer"
-                bg={activeTab === tab.id ? 'brand.50' : 'transparent'}
-                color={activeTab === tab.id ? 'brand.600' : 'gray.500'}
+                bg={activeTab === tab.id ? 'app.activeBg' : 'transparent'}
+                color={activeTab === tab.id ? 'brand.600' : 'app.textMuted'}
                 transition="all 0.2s"
                 _active={{ transform: 'scale(0.95)' }}
                 onClick={() => setActiveTab(tab.id)}
